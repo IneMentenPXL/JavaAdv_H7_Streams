@@ -4,9 +4,8 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
-import java.util.OptionalDouble;
+import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class StudentDemo {
     public static void main(String[] args) {
@@ -47,28 +46,20 @@ public class StudentDemo {
         System.out.println(names);
 
         System.out.println("Oefening 7");
-        studentList.stream()
+        Student student = studentList.stream()
                 .filter(s -> s.getGraduationYear() == 2018)
-                .sorted((student1, student2) -> student2.getDateOfBirth().compareTo(student1.getDateOfBirth()))
-                .limit(1)
-                .forEach(s -> System.out.println(s.getName() + " " + s.getGraduationYear() + " " + ChronoUnit.YEARS.between(s.getDateOfBirth(), LocalDate.now())));
+                .max(Comparator.comparing(Student::getDateOfBirth))
+                .get();
+        System.out.println(student.getName() + " " + student.getGraduationYear() + " " + ChronoUnit.YEARS.between(student.getDateOfBirth(), LocalDate.now()));
 
         System.out.println("Oefening 8");
-        OptionalDouble average2017 = studentList.stream()
-                .filter(s -> s.getGraduationYear() == 2017)
-                .mapToDouble(Student::getScore)
-                .average();
-        OptionalDouble average2018 = studentList.stream()
-                .filter(s -> s.getGraduationYear() == 2018)
-                .mapToDouble(Student::getScore)
-                .average();
-        Stream.of(average2017, average2018)
-                .forEach(s -> System.out.println(s.getAsDouble()));
+        Map<Integer, Double> averageScorePerYearMap = studentList.stream()
+                .collect(Collectors.groupingBy(Student::getGraduationYear, Collectors.averagingInt(Student::getScore)));
+        System.out.println(averageScorePerYearMap);
 
         System.out.println("Oefening 9");
         studentList.stream()
-                .sorted(Comparator.comparing(Student::getGraduationYear))
-                .sorted((student1, student2) -> student2.getScore() - student1.getScore())
+                .sorted(Comparator.comparing(Student::getGraduationYear).thenComparing(Student::getScore).reversed())
                 .forEach(s -> System.out.println(s.getName() + " " + s.getGraduationYear() + " " + s.getScore()));
    }
 }
